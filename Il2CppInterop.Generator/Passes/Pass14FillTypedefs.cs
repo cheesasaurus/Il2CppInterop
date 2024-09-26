@@ -1,6 +1,9 @@
+using System.Linq;
+using Il2CppInterop.Common;
 using Il2CppInterop.Generator.Contexts;
 using Il2CppInterop.Generator.Extensions;
 using Il2CppInterop.Generator.Utils;
+using Microsoft.Extensions.Logging;
 using Mono.Cecil;
 
 namespace Il2CppInterop.Generator.Passes;
@@ -30,10 +33,12 @@ public static class Pass14FillTypedefs
                         newParameter.Attributes = originalParameter.Attributes.StripValueTypeConstraint();
                 }
 
-                if (typeContext.OriginalType.IsEnum)
+                if (typeContext.OriginalType.IsEnum) {
                     typeContext.NewType.BaseType = assemblyContext.Imports.Module.Enum();
-                else if (typeContext.ComputedTypeSpecifics.IsBlittable())
+                }
+                else if (typeContext.ComputedTypeSpecifics.IsBlittable() && !DOTSUtil.ImplementsISystem(typeContext.OriginalType)) {
                     typeContext.NewType.BaseType = assemblyContext.Imports.Module.ValueType();
+                }
             }
         }
 
